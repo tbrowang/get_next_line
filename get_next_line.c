@@ -6,7 +6,7 @@
 /*   By: tbrowang <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/06 05:14:41 by tbrowang          #+#    #+#             */
-/*   Updated: 2021/12/06 13:08:42 by tbrowang         ###   ########.fr       */
+/*   Updated: 2021/12/06 15:54:22 by tbrowang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ t_buffer	*init_buffer(int fd)
 }
 
 
-char	*build_string(int pos_eol, t_buffer **buffer_lst, int fd)
+char	*build_string(int pos_eol, t_buffer **buffer_lst)
 {
 	int		index;
 	char	*str;
@@ -88,8 +88,6 @@ char	*build_string(int pos_eol, t_buffer **buffer_lst, int fd)
 	str = malloc(sizeof(char) * (pos_eol + 1));
 	ptr_str = str;
 	index = (*buffer_lst)->index;
-	//	printf("before ptr    = %p\n", *buffer_lst);
-	//	printf("buff       = >>>%s<<<\n", (*buffer_lst)->buff + pos_eol);
 	if (pos_eol == -1)
 	{
 		free (str);
@@ -101,15 +99,11 @@ char	*build_string(int pos_eol, t_buffer **buffer_lst, int fd)
 		if (index == (*buffer_lst)->length)
 		{
 			*buffer_lst = free_lst(*buffer_lst);
-			//		printf("ptr    = %p\n", *buffer_lst);
 			index = 0;
 		}
 	}
-	//	printf("after ptr    = %p\n", *buffer_lst);
 	if (*buffer_lst)
 		(*buffer_lst)->index = index;
-	else
-		*buffer_lst = init_buffer(fd);
 	*str = '\0';
 	return (ptr_str);
 }
@@ -122,7 +116,6 @@ int	search_eol(int fd, t_buffer *buffer_lst)
 
 	i = buffer_lst->index;
 	pos_endl = 0;
-	//tmpbuff = NULL;
 	while (buffer_lst->buff[i] && i <= buffer_lst->length)
 	{
 		pos_endl++;
@@ -141,13 +134,6 @@ int	search_eol(int fd, t_buffer *buffer_lst)
 			i = 0;
 		}
 	}
-
-	//	printf("eol        = %d\n", pos_endl);
-	//	printf("length     = %d\n", buffer_lst->length);
-	//	printf("index      = %d\n", buffer_lst->index);
-	//	printf("buff       = %s\n", buffer_lst->buff);
-	//	printf("eof        = %d\n", buffer_lst->eof);
-
 	return (pos_endl);
 }
 
@@ -163,13 +149,7 @@ char	*get_next_line(int fd)
 		fd_open[fd] = init_buffer(fd);
 	if (!fd_open[fd])
 		return (NULL);
-	//	printf("length     = %d\n", fd_open[fd]->length);
-	//	printf("index      = %d\n", fd_open[fd]->index);
-	//	printf("buff       = %s\n", fd_open[fd]->buff);
-	//	printf("eof        = %d\n", fd_open[fd]->eof);
 	pos_endl = search_eol(fd, fd_open[fd]);
-	//	printf("pos_eof    = %d\n", pos_endl);
-	//	printf("buff       = >>>%s<<<\n", fd_open[fd]->buff + pos_endl);
-	str = build_string(pos_endl, &fd_open[fd], fd);
+	str = build_string(pos_endl, &fd_open[fd]);
 	return (str);	
 }
