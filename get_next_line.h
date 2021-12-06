@@ -6,7 +6,7 @@
 /*   By: tbrowang <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/06 05:29:30 by tbrowang          #+#    #+#             */
-/*   Updated: 2021/12/06 08:13:16 by tbrowang         ###   ########.fr       */
+/*   Updated: 2021/12/06 14:50:02 by tbrowang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #define GET_NEXT_LINE_H
 
 #ifndef BUFF_SIZE
-#define BUFF_SIZE 128
+#define BUFF_SIZE 42
 #endif
 
 #define MAX_OPEN 65535
