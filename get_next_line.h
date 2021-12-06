@@ -5,30 +5,34 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: tbrowang <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/12/04 23:38:41 by tbrowang          #+#    #+#             */
-/*   Updated: 2021/12/05 01:05:55 by tbrowang         ###   ########.fr       */
+/*   Created: 2021/12/06 05:29:30 by tbrowang          #+#    #+#             */
+/*   Updated: 2021/12/06 08:13:16 by tbrowang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
-
-# include <unistd.h>
-# include <stdlib.h>
+#define GET_NEXT_LINE_H
 
 #ifndef BUFF_SIZE
-# define BUFF_SIZE 12
+#define BUFF_SIZE 128
 #endif
 
-char *get_next_line(int fd);
+#define MAX_OPEN 65535
 
-typedef struct		s_read
+typedef enum s_bool
 {
-	int				size;
-	int				index;
-	int				fd;
-	char			*read;
-	struct s_read	*next;
-}					t_read;
+	FALSE,
+	TRUE
+}	t_bool;
 
+typedef struct	s_buffer
+{
+		int				length;
+		int				index;
+		char			*buff;
+		t_bool			eof;
+		struct s_buffer *next;
+}		t_buffer;
+
+char	*get_next_line(int fd);
 #endif

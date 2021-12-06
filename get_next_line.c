@@ -3,174 +3,140 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nsierra- <nsierra-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tbrowang <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2013/12/15 20:41:01 by nsierra-          #+#    #+#             */
-/*   Updated: 2021/12/05 01:07:24 by tbrowang         ###   ########.fr       */
+/*   Created: 2021/12/06 05:14:41 by tbrowang          #+#    #+#             */
+/*   Updated: 2021/12/06 10:25:47 by tbrowang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
 
-static t_read		*ft_freeread(t_read *red, t_read *prev, t_read **start)
+t_buffer	*free_lst(t_buffer *buffer_lst)
 {
-	if (!prev)
-		*start = red->next;
-	else
-		prev->next = red->next;
-	free(red->read);
-	free(red);
-	if (!prev)
-		return (*start);
-	else
-		return (prev->next);
+	t_buffer *tmp_buff;
+
+	tmp_buff = buffer_lst->next;
+	free(buffer_lst->buff);
+	free(buffer_lst);
+	buffer_lst = NULL;
+	return (tmp_buff);
 }
 
-static t_read		*ft_newread(int fd)
+char	*build_string(int pos_eol, t_buffer **buffer_lst)
 {
-	t_read			*red;
-	void			*tmp;
-	int				ret;
+	int		index;
+	char	*str;
+	char	*ptr_str;
 
-	if (!(red = (t_read *)malloc(sizeof(t_read))))
+	if ((*buffer_lst)->length == 0)
 		return (NULL);
-	if (!(tmp = malloc(sizeof(char) * BUFF_SIZE)))
+	str = malloc(sizeof(char) * (pos_eol + 1));
+	ptr_str = str;
+	index = (*buffer_lst)->index;
+	//	printf("before ptr    = %p\n", *buffer_lst);
+	printf("buff       = >>>%s<<<\n", (*buffer_lst)->buff + pos_eol);
+	while (pos_eol--)
 	{
-		free(red);
-		return (NULL);
-	}
-	if ((ret = read(fd, tmp, BUFF_SIZE)) < 0)
-	{
-		free(red);
-		free(tmp);
-		return (NULL);
-	}
-	red->read = (char *)tmp;
-	red->fd = fd;
-	red->size = ret;
-	red->next = NULL;
-	red->index = 0;
-	return (red);
-}
-
-static int			ft_print(int n, t_read **tab, t_read **s, char** l)
-{
-	char			*tmpstr;
-	int				index;
-
-	if (!tab[0])
-		return (-1);
-	index = (tab[0])->index;
-	if (n == -1 || !(tmpstr = (char *)malloc(sizeof (char) * (n + 1))))
-		return (-1);
-	*l = tmpstr;
-	while (n--)
-	{
-		*tmpstr++ = (tab[0])->read[index++];
-		if (index == (tab[0])->size)
+		*str++ = (*buffer_lst)->buff[index++];
+		if (index == BUFF_SIZE/*(*buffer_lst)->length*/)
 		{
-			tab[0] = ft_freeread(tab[0], tab[1], s);
+			*buffer_lst = free_lst(*buffer_lst);
+			//		printf("ptr    = %p\n", *buffer_lst);
 			index = 0;
 		}
 	}
-	*tmpstr = 0;
-	if (!tab[0] || (index == tab[0]->size && tab[0]->size < BUFF_SIZE))
-		return (0);
-	tab[0]->index = index + 1;
-	if (tab[0]->index == tab[0]->size)
-		tab[0] = ft_freeread(tab[0], tab[1], s);
-	return (1);
+	//	printf("after ptr    = %p\n", *buffer_lst);
+	(*buffer_lst)->index = index;
+	*str = '\0';
+	return (ptr_str);
 }
 
-static int			ft_findendl(int fd, t_read *red)
+t_buffer	*init_buffer(int fd)
 {
-	int				index;
-	int				size;
-	t_read			*tmplst;
-	int				state;
+	t_buffer	*new_buffer;
 
-	size = 0;
-	state = 0;
-	index = red->index;
-	while (red->read[index] != '\n' && index < red->size )
+	new_buffer = malloc(sizeof(t_buffer));
+	if (!new_buffer)
+		return (NULL);
+	new_buffer->buff = malloc(sizeof(char) * BUFF_SIZE);
+	if (!(new_buffer->buff))
 	{
-		index++;
-		size++;
-		if (index == red->size && red->size == BUFF_SIZE)
+		free(new_buffer);
+		return (NULL);
+	}
+	new_buffer->length = read(fd, new_buffer->buff, BUFF_SIZE);
+	if (new_buffer->length < 0)
+	{
+		free(new_buffer->buff);
+		free(new_buffer);
+		return (NULL);
+	}
+	new_buffer->index = 0;
+	if (new_buffer->length == 0)
+		new_buffer->eof = TRUE;
+	else
+		new_buffer->eof = FALSE;
+	new_buffer->next = NULL;
+	return (new_buffer);
+}
+
+int	search_eol(int fd, t_buffer *buffer_lst)
+{
+	int			i;
+	int			pos_endl;
+	t_buffer	*tmpbuff;
+
+	i = buffer_lst->index;
+	pos_endl = 0;
+	tmpbuff = NULL;
+	while (buffer_lst->buff[i] && i <= buffer_lst->length)
+	{
+
+		pos_endl++;
+		if ((i == buffer_lst->length && buffer_lst->eof == TRUE)
+				|| buffer_lst->buff[i] == '\n')
+			break ;
+		i++;
+		if (i == buffer_lst->length)
 		{
-			if (!(tmplst = ft_newread(fd)))
-			{
-				return (-1);
-			//	state = -1;
-			//	break;
-			}
-			tmplst->next = red->next;
-			red->next = tmplst;
-			red = tmplst;
-			index = 0;
+			tmpbuff = init_buffer(fd);
+			tmpbuff->next = buffer_lst->next;
+			buffer_lst->next = tmpbuff;
+			buffer_lst = tmpbuff;
+			i = 0;
+			printf("length     = %d\n", buffer_lst->length);
+			printf("index      = %d\n", buffer_lst->index);
+			printf("buff       = %s\n", buffer_lst->buff);
+			printf("eof        = %d\n", buffer_lst->eof);
 		}
 	}
-//	if (state != -1)
-//		return (size + 1);
-	return (size);
-}
+//	printf("length     = %d\n", buffer_lst->length);
+//	printf("index      = %d\n", buffer_lst->index);
+//	printf("buff       = %s\n", buffer_lst->buff);
+//	printf("eof        = %d\n", buffer_lst->eof);
 
-//char	*get_next_line(int fd)
-//{
-//	static t_read	*start = NULL;
-//	t_read			*red;
-//	t_read			*prevtmp;
-//	t_read			*tab[2];
-//	char			*line;
-//
-//	if (fd < 0)
-//		return (NULL);
-//	prevtmp = NULL;
-//	if (!start)
-//		start = ft_newread(fd);
-//	red = start;
-//	while (red->fd != fd)
-//	{
-//		if (!(red->next))
-//			red->next = ft_newread(fd);
-//		prevtmp = red;
-//		red = red->next;
-//	}
-//	if (!red || !start)
-//		return (NULL);
-//	tab[0] = red;
-//	tab[1] = prevtmp;
-//	ft_print(ft_findendl(fd, red), tab, &start, &line);
-//	return (line);
-//}
+	return (pos_endl);
+}
 
 char	*get_next_line(int fd)
 {
-	static t_read	*start = NULL;
-	t_read			*tab[2];
-	char			*line;
-	int				state;
+	static t_buffer	*fd_open[MAX_OPEN];
+	int				pos_endl;
+	char			*str;
 
-	if (fd < 0)
-		return (NULL);
-	tab[1] = NULL;
-	if (!start)
-		start = ft_newread(fd);
-	tab[0] = start;
-	while (tab[0]->fd != fd)
-	{
-		if (!(tab[0]->next))
-			tab[0]->next = ft_newread(fd);
-		tab[1] = tab[0];
-		tab[0] = tab[0]->next;
-	}
-	if (!tab[0] || !start)
-		return (NULL);
-	state = ft_print(ft_findendl(fd, tab[0]), tab, &start, &line);
-	if (state <= 0)
-	{
-		free(line);
-		return (NULL);
-	}
-	return (line);
+	if (!fd_open[fd])
+		fd_open[fd] = init_buffer(fd);
+	//	printf("length     = %d\n", fd_open[fd]->length);
+	//	printf("index      = %d\n", fd_open[fd]->index);
+	//	printf("buff       = %s\n", fd_open[fd]->buff);
+	//	printf("eof        = %d\n", fd_open[fd]->eof);
+	pos_endl = search_eol(fd, fd_open[fd]);
+	//	printf("pos_eof    = %d\n", pos_endl);
+//	printf("buff       = >>>%s<<<\n", fd_open[fd]->buff + pos_endl);
+	str = build_string(pos_endl, &fd_open[fd]);
+	return (str);	
 }
