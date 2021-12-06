@@ -1,22 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tbrowang <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/06 05:14:41 by tbrowang          #+#    #+#             */
-/*   Updated: 2021/12/06 18:10:28 by tbrowang         ###   ########.fr       */
+/*   Updated: 2021/12/06 16:55:08 by tbrowang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 #include <stdlib.h>
 #include <unistd.h>
 
 static t_buffer	*free_lst(t_buffer *buffer_lst)
 {
-	t_buffer	*tmp_buff;
+	t_buffer *tmp_buff;
 
 	tmp_buff = buffer_lst->next;
 	free(buffer_lst->buff);
@@ -54,6 +54,7 @@ static t_buffer	*init_buffer(int fd)
 	return (new_buffer);
 }
 
+
 static char	*build_string(int pos_eol, t_buffer **buffer_lst)
 {
 	int		index;
@@ -66,7 +67,10 @@ static char	*build_string(int pos_eol, t_buffer **buffer_lst)
 	ptr_str = str;
 	index = (*buffer_lst)->index;
 	if (pos_eol == -1)
-		return (free(str), NULL);
+	{
+		free (str);
+		return (NULL);
+	}
 	while (pos_eol--)
 	{
 		*str++ = (*buffer_lst)->buff[index++];
@@ -94,7 +98,7 @@ static int	search_eol(int fd, t_buffer *buffer_lst)
 	{
 		pos_endl++;
 		if ((i == buffer_lst->length && buffer_lst->eof == TRUE)
-			|| buffer_lst->buff[i] == '\n')
+				|| buffer_lst->buff[i] == '\n')
 			break ;
 		i++;
 		if (i == buffer_lst->length)
@@ -125,5 +129,5 @@ char	*get_next_line(int fd)
 		return (NULL);
 	pos_endl = search_eol(fd, fd_open[fd]);
 	str = build_string(pos_endl, &fd_open[fd]);
-	return (str);
+	return (str);	
 }
