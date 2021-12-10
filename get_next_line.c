@@ -6,7 +6,7 @@
 /*   By: tbrowang <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/06 05:14:41 by tbrowang          #+#    #+#             */
-/*   Updated: 2021/12/06 18:10:28 by tbrowang         ###   ########.fr       */
+/*   Updated: 2021/12/10 04:01:02 by tbrowang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,10 @@ static t_buffer	*init_buffer(int fd)
 	new_buffer = malloc(sizeof(t_buffer));
 	if (!new_buffer)
 		return (NULL);
-	new_buffer->buff = ft_calloc(sizeof(char), BUFFER_SIZE);
+	new_buffer->buff = malloc(sizeof(char) * BUFFER_SIZE);
+	*(new_buffer->buff) = '\0';
 	if (!(new_buffer->buff))
-	{
-		free(new_buffer);
-		return (NULL);
-	}
+		return (free(new_buffer), NULL);
 	new_buffer->length = read(fd, new_buffer->buff, BUFFER_SIZE);
 	if (new_buffer->length < 0)
 	{
@@ -46,7 +44,7 @@ static t_buffer	*init_buffer(int fd)
 		return (NULL);
 	}
 	new_buffer->index = 0;
-	if (new_buffer->length == 0)
+	if (!new_buffer->length)
 		new_buffer->eof = TRUE;
 	else
 		new_buffer->eof = FALSE;
@@ -54,13 +52,13 @@ static t_buffer	*init_buffer(int fd)
 	return (new_buffer);
 }
 
-static char	*build_string(int pos_eol, t_buffer **buffer_lst)
+static char	*build_string(register int pos_eol, register t_buffer **buffer_lst)
 {
-	int		index;
-	char	*str;
-	char	*ptr_str;
+	register int		index;
+	register char		*str;
+	char				*ptr_str;
 
-	if ((*buffer_lst)->length == 0)
+	if (!((*buffer_lst)->length))
 		return (NULL);
 	str = malloc(sizeof(char) * (pos_eol + 1));
 	ptr_str = str;
@@ -82,21 +80,21 @@ static char	*build_string(int pos_eol, t_buffer **buffer_lst)
 	return (ptr_str);
 }
 
-static int	search_eol(int fd, t_buffer *buffer_lst)
+static int	search_eol(int fd, register t_buffer *buffer_lst)
 {
-	int			i;
-	int			pos_endl;
-	t_buffer	*tmpbuff;
+	register int			i;
+	register int			pos_endl;
+	t_buffer				*tmpbuff;
 
 	i = buffer_lst->index;
 	pos_endl = 0;
 	while (buffer_lst->buff[i] && i <= buffer_lst->length)
 	{
-		pos_endl++;
+		++pos_endl;
 		if ((i == buffer_lst->length && buffer_lst->eof == TRUE)
 			|| buffer_lst->buff[i] == '\n')
 			break ;
-		i++;
+		++i;
 		if (i == buffer_lst->length)
 		{
 			tmpbuff = init_buffer(fd);
