@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.h                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tbrowang <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/06 05:29:30 by tbrowang          #+#    #+#             */
-/*   Updated: 2021/12/06 16:45:08 by tbrowang         ###   ########.fr       */
+/*   Updated: 2021/12/13 21:59:19 by tbrowang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
+#ifndef GET_NEXT_LINE_BONUS_H
+# define GET_NEXT_LINE_BONUS_H
 # include <stddef.h>
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 4096
@@ -34,6 +34,4 @@ typedef struct s_buffer
 }		t_buffer;
 
 char	*get_next_line(int fd);
-void	*ft_memset(void *s, register int c, register size_t n);
-void	*ft_calloc(size_t nmemb, size_t size);
 #endif
