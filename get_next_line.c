@@ -6,7 +6,7 @@
 /*   By: tbrowang <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/06 05:14:41 by tbrowang          #+#    #+#             */
-/*   Updated: 2021/12/10 04:01:02 by tbrowang         ###   ########.fr       */
+/*   Updated: 2021/12/10 05:47:38 by tbrowang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ static int	search_eol(int fd, register t_buffer *buffer_lst)
 	while (buffer_lst->buff[i] && i <= buffer_lst->length)
 	{
 		++pos_endl;
-		if ((i == buffer_lst->length && buffer_lst->eof == TRUE)
+		if ((i == buffer_lst->length && buffer_lst->eof)
 			|| buffer_lst->buff[i] == '\n')
 			break ;
 		++i;
