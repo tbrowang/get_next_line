@@ -6,7 +6,7 @@
 /*   By: tbrowang <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/06 05:14:41 by tbrowang          #+#    #+#             */
-/*   Updated: 2021/12/15 22:17:48 by tbrowang         ###   ########.fr       */
+/*   Updated: 2022/03/02 16:22:21 by tbrowang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,9 +99,7 @@ static int	search_eol(int fd, register t_buffer *buffer_lst)
 		{
 			tmpbuff = init_buffer(fd);
 			if (!tmpbuff)
-			{
 				return (-1);
-			}
 			tmpbuff->next = buffer_lst->next;
 			buffer_lst->next = tmpbuff;
 			buffer_lst = tmpbuff;
